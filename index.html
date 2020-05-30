@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Analisador Sintático</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+
+    <link rel="stylesheet" href="css/index.css">
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <script src="js/index.js"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-color-padrao">
+        <a class="navbar-brand" href="#">Analisador Sintático</a>
+    </nav>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Informações da gramática</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              
+                <div class="col-sm-5 adjust-margin-top">
+                    <div class="row mb-3">
+                        <div class="col-sm-4">
+                            <h4>GRAMÁTICA</h4> 
+                            <div style="font-family: monospace">
+                                S :: = bB | eA 
+                                <br> A :: = cB | bSA
+                                <br> B :: = eC | &epsilon;
+                                <br> C :: = dB | bS 
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <h4>FIRST</h4> 
+                            <div style="font-family: monospace">
+                                First(S) = {b,e}
+                                <br> First(A) = {c, b}
+                                <br> First(B) = {e, &epsilon;}	
+                                <br> First(C) = {d, b}
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <h4>FOLLOW</h4>
+                            <div style="font-family: monospace">
+                                Follow(S) = {$,c,b}
+                                <br> Follow(A) = {$,c,b}
+                                <br> Follow(B) =  {$,c,b}
+                                <br> Follow(C) =  {$,c,b}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row"> 
+                        <div class="col-sm-12 margin-top">
+                            <h4>TABELA DE PARSING</h4>
+                            <table class="table table-bordered">
+                                <thead class="bg-style-table">
+                                    <tr>
+                                        <th></th>
+                                        <th>a</th>
+                                        <th>b</th>
+                                        <th>c</th>
+                                        <th>d</th>
+                                        <th>e</th>
+                                        <th>$</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <th class="bg-style-table">S</th>
+                                        <td> - </td>
+                                        <td>S ::= bB</td>
+                                        <td> - </td>
+                                        <td> - </td>
+                                        <td>S ::= eA</td>
+                                        <td> - </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-style-table">A</th>
+                                        <td> - </td>
+                                        <td>A ::= bSA</td>
+                                        <td>A ::= cB</td>
+                                        <td> - </td>
+                                        <td> - </td>
+                                        <td> - </td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-style-table">B</th>
+                                        <td> - </td>
+                                        <td>B ::= &epsilon;</td>
+                                        <td>B ::= &epsilon;</td>
+                                        <td> - </td>
+                                        <td>B ::= eC</td>
+                                        <td>B ::= &epsilon;</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="bg-style-table">C</th>
+                                        <td> - </td>
+                                        <td>C ::= bS</td>
+                                        <td> - </td>
+                                        <td>C ::= dB</td>
+                                        <td> - </td>
+                                        <td> - </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    <div class="container-fluid">
+        <hr>
+        <div class="row">
+
+            <div class="col-sm-7">
+                <div class="row">
+                    <div class="col-sm-11 adjust-margin">
+                        <div class="form-group form-group-sm">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <div><button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#exampleModal">
+                                        Informações da gramática
+                                    </button></div>
+                                    <div><button class="btn btn-info" type="button" id="btn-generate">Gerar sentença</button></div>
+                                </div>
+                                <input type="text" class="form-control" placeholder="Ex: ebeccededebbebb" id="input-sentence">
+                                <div class="input-group-append">
+                                    <button class="btn bg-color-padrao" type="button" id="btn-verify-sentence">Verificar sentença</button>
+                                </div>
+                            </div>
+                        </div>
+                        <table class="table table-sm table-bordered debug-table">
+                            <thead class="bg-style-table">
+                                <tr>
+                                    <th>Pilha</th>
+                                    <th>Entrada</th>
+                                    <th>Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                        <button class="btn btn-info" type="button" id="btn-verify-step">Passo a passo</button>
+                        <button class="btn btn-danger" type="button" id="btn-clean" title="Limpar">Limpar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
