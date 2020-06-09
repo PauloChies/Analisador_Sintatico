@@ -1,3 +1,4 @@
+//entradas
 $(document).ready(function () {
 
     $('#input-sentence').on('keyup', function() {
@@ -23,7 +24,7 @@ $(document).ready(function () {
 
     $('#btn-generate').click(function() {
         $('#btn-clean').click();
-        var sentence = generateRandomSentence();
+        var sentence = randomSentence();
         $('#input-sentence').val(sentence);
     });
 });
@@ -66,46 +67,6 @@ var parsingTable = {
     }
 };
 
-function currentState() {
-    return {
-        input: input.join(''),
-        stack: stack.join(''),
-        accepted: accepted,
-        table: mountTable
-    };
-}
-
-function generateRandomSentence() {
-    var currentNonTerminal = 'S';
-    var generating = true;
-    var currentSentence = '';
-
-    while (generating) {
-        var ruleLength = grammar[currentNonTerminal].length;
-        var generatedSentence = grammar[currentNonTerminal][Math.floor(Math.random() * ruleLength)];
-
-        currentSentence === '' ? currentSentence = generatedSentence : currentSentence = currentSentence.replace(currentNonTerminal, generatedSentence);
-
-        var ruleIndex = -1;
-
-        for (index in currentSentence) {
-            ruleIndex = NON_TERMINALS.indexOf(currentSentence[index]);
-            if (ruleIndex !== -1) {
-                currentNonTerminal = NON_TERMINALS[ruleIndex];
-                break;
-            }
-        }
-
-        if (ruleIndex === -1) generating = false;
-    }
-
-    currentSentence = currentSentence.replace('&', '');
-
-    if (currentSentence.indexOf('&') !== -1) currentSentence = currentSentence.replace('&', '');
-
-    return currentSentence;
-}
-
 function resetApp() {
     stack = ['$', 'S'];
     input = [];
@@ -115,40 +76,96 @@ function resetApp() {
     iteration = 1;
 }
 
-function analyzeNewStep() {
+function currentState() {
+    return {
+        input: input.join(''),
+        stack: stack.join(''),
+        accepted: accepted,
+        table: mountTable
+    };
+}
 
+function randomSentence() {
+    var rule = 'S';
+    var generating = true;
+    var sentence = '';
+    while (generating) {
+        var ruleLength = grammar[rule].length;
+        var generatedSentence = grammar[rule][Math.floor(Math.random() * ruleLength)];
+
+        sentence === '' ? sentence = generatedSentence : sentence = sentence.replace(rule, generatedSentence);
+
+        var ruleIndex = -1;
+        for (var i = 0; i < sentence.length; i++) {
+            ruleIndex = NON_TERMINALS.indexOf(sentence[i]);
+            if (ruleIndex !== -1) {
+                rule = NON_TERMINALS[ruleIndex];
+                break;
+            }
+        }
+        if (ruleIndex === -1) {
+            generating = false;
+        } 
+    }
+    sentence = sentence.replace('&', '');
+    if (sentence.indexOf('&') !== -1) {
+        sentence = sentence.replace('&', '');
+    }
+    return sentence;
+}
+
+function newStepAnalysis() {
+
+    // cria a linha da tabela de derivação
     var tableRow = {
         iter: iteration,
         stack: stack.join(''),
         input: input.join('')
     };
 
+    // topo da pilha
     var topStack = stack[stack.length - 1];
 
+    // simbolo atual na entrada
     var currentSymbol = input[0];
 
+    // se o final da pilha e símbolo atual = $ então sentença aceita
     if (topStack === '$' && currentSymbol === '$') {
         keepAnalysing = false;
         accepted = true;
         tableRow.action = 'Aceito em ' + iteration + ' iterações';
     } else {
+        // se o topo da pilha for igual ao simbolo da entrada, lê a entrada
         if (topStack === currentSymbol) {
             tableRow.action = 'Lê \'' + currentSymbol + '\'';
             stack.pop();
             input.shift();
-        } else if ( parsingTable[topStack] !== undefined && parsingTable[topStack][currentSymbol] !== undefined) {
+
+            // se existir uma entrada equivalente ao simbolo de entrada ao 
+            // não-terminal no topo da pilha na tabela de Parsing
+        } else if (
+            parsingTable[topStack] !== undefined &&
+            parsingTable[topStack][currentSymbol] !== undefined
+        ) {
+            // produção em array da tabela de parsing para o simbolo terminal da entrada
             var toStack = parsingTable[topStack][currentSymbol];
+            // produção em formato de string
             var production = toStack.join('');
 
+            // adiciona a ação atual na tabela
             tableRow.action = topStack + ' -> ' + production;
 
+            // remove o topo da pilha
             stack.pop();
 
+            // se a produção não for vazia ('&'), coloca seu conteúdo da pilha
             if (production !== '&') {
                 for (var j = toStack.length - 1; j >= 0; j--) {
                     stack.push(toStack[j])
                 }
             }
+
+            // finaliza a analise com erro
         } else {
             keepAnalysing = false;
             accepted = false;
@@ -156,6 +173,7 @@ function analyzeNewStep() {
         }
     }
 
+    // incrementa a iteração e coloca a linha gerada na tabela
     iteration++;
     mountTable.push(tableRow);
 }
@@ -167,7 +185,7 @@ function oneStepAnalysis(inputString) {
     input = (inputString + '$').split('');
 
     while (keepAnalysing) {
-        analyzeNewStep();
+        newStepAnalysis();
     }
 
     return currentState();
@@ -182,7 +200,7 @@ function stepByStepAnalysis(inputString) {
         input = (inputString + '$').split('');
     }
 
-    analyzeNewStep();
+    newStepAnalysis();
 
     return currentState();
 }
