@@ -107,10 +107,7 @@ function randomSentence() {
             generating = false;
         } 
     }
-    sentence = sentence.replace('&', '');
-    if (sentence.indexOf('&') !== -1) {
-        sentence = sentence.replace('&', '');
-    }
+    sentence = sentence.replace(/[^a-zA-Z0-9]/g,'');
     return sentence;
 }
 
