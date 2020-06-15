@@ -1,4 +1,3 @@
-//entradas
 $(document).ready(function () {
 
     $('#input-sentence').on('keyup', function() {
@@ -113,64 +112,47 @@ function randomSentence() {
 
 function newStepAnalysis() {
 
-    // cria a linha da tabela de derivação
     var tableRow = {
         iter: iteration,
         stack: stack.join(''),
         input: input.join('')
     };
 
-    // topo da pilha
     var topStack = stack[stack.length - 1];
 
-    // simbolo atual na entrada
     var currentSymbol = input[0];
 
-    // se o final da pilha e símbolo atual = $ então sentença aceita
     if (topStack === '$' && currentSymbol === '$') {
         keepAnalysing = false;
         accepted = true;
         tableRow.action = 'Aceito em ' + iteration + ' iterações';
     } else {
-        // se o topo da pilha for igual ao simbolo da entrada, lê a entrada
+
         if (topStack === currentSymbol) {
             tableRow.action = 'Lê \'' + currentSymbol + '\'';
             stack.pop();
             input.shift();
-
-            // se existir uma entrada equivalente ao simbolo de entrada ao 
-            // não-terminal no topo da pilha na tabela de Parsing
         } else if (
             parsingTable[topStack] !== undefined &&
             parsingTable[topStack][currentSymbol] !== undefined
         ) {
-            // produção em array da tabela de parsing para o simbolo terminal da entrada
             var toStack = parsingTable[topStack][currentSymbol];
-            // produção em formato de string
             var production = toStack.join('');
-
-            // adiciona a ação atual na tabela
             tableRow.action = topStack + ' -> ' + production;
-
-            // remove o topo da pilha
             stack.pop();
 
-            // se a produção não for vazia ('&'), coloca seu conteúdo da pilha
             if (production !== '&') {
                 for (var j = toStack.length - 1; j >= 0; j--) {
                     stack.push(toStack[j])
                 }
             }
 
-            // finaliza a analise com erro
         } else {
             keepAnalysing = false;
             accepted = false;
             tableRow.action = 'Erro em ' + iteration + ' iterações';
         }
     }
-
-    // incrementa a iteração e coloca a linha gerada na tabela
     iteration++;
     mountTable.push(tableRow);
 }
